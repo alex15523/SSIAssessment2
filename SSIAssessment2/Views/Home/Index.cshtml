@@ -1,0 +1,107 @@
+﻿@model (List<List<string>>, int)
+@{
+    ViewData["Title"] = "Home Page";
+    var errorMessage = ViewBag.ErrorMessage;
+    var uploadSuccess = "false";
+
+    if (ViewBag.UploadSuccess != null && ViewBag.UploadSuccess)
+    {
+        uploadSuccess = "true";
+    }
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+<div class="text-center">
+    <h1 class="display-4" style="font-weight:bold">Upload an EDI 837 File</h1>
+    <br />
+    <p><a>Select and upload an EDI 837 file - its contents will be parsed and displayed on this page.</a></p>
+</div>
+
+<hr />
+
+<form method="post" enctype="multipart/form-data" asp-controller="Home" asp-action="Index">
+    <div class="input-group center" style="padding-top: 50px">
+        <div class="input-group-prepend">
+            <input type="submit" value="Upload" class="btn btn-primary" />
+        </div>
+        <div class="custom-file">
+            <input type="file" name="uploadedFile" class="custom-file-input" id="inputGroupFile01"
+                   aria-describedby="inputGroupFileAddon01">
+            <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+        </div>
+    </div>
+</form>
+
+<div id="claims">
+    @if (Model.Item1 != null && Model.Item1.Count > 0)
+    {
+        <br /><br />
+        <p style="font-weight:bold; text-align:center">Total Claims Charge Amount: @Model.Item2</p>
+        <br /><br />
+      
+        var index = 1;
+
+        foreach (var claim in Model.Item1)
+        {
+            <p style="font-weight:bold; font-size:24px">Segment : @index</p>
+            <div>
+                @foreach (var component in claim)
+                {
+                    <p>@component</p>
+                }
+            </div>
+
+            @if (index != Model.Item1.Count)
+            {
+                <br />
+                <hr />
+                <br />
+            }
+
+            index++;
+        }
+    }
+</div>
+
+<script>
+    //function to set file name to file upload field
+    $(".custom-file-input").on("change", function () {
+        var fileName = $(this).val().split("\\").pop();
+        $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+    });
+
+    var errorMessage = "@errorMessage";
+    var uploadStatus = "@uploadSuccess";
+
+    //modal pop-up for file uploading status
+    if (uploadStatus == "true") {
+        Swal.fire({
+            title: 'File successfully uploaded and parsed.',
+            icon: 'success',
+            confirmButtonColor: '#3085d6',
+        })
+    }
+    else if (errorMessage != null && errorMessage != "") {
+        Swal.fire({
+            title: 'File could not be read.',
+            text: errorMessage,
+            icon: 'error',
+            confirmButtonColor: '#3085d6',
+        })
+    }
+</script>
+
+<style>
+    .center {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100px;
+    }
+</style>
